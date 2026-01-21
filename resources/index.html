@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UI Transition Graph</title>
+
+    <!-- 引入 Vis.js 样式和脚本 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        #network {
+            width: 70%;
+            height: 100vh;
+            border: 1px solid lightgray;
+        }
+
+        #details-container {
+            width: 30%;
+            height: 100vh;
+            padding: 20px;
+            background-color: #ffffff;
+            /*overflow-y: auto;*/
+        }
+
+
+        .state-image, .edge-image {
+            width: 30%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<div id="network"></div>
+<div id="details-container">
+    <h3>Details</h3>
+    <div id="node-details" style="display: none;">
+        <p><strong>State ID:</strong> <span id="state-id"></span></p>
+        <p><strong>Package:</strong> <span id="state-package"></span></p>
+        <p><strong>Activity:</strong> <span id="state-activity"></span></p>
+        <p><strong>Type:</strong> <span id="state-type"></span></p>
+        <p><strong>Description:</strong> <span id="state-description"></span></p>
+        <img id="state-image" class="state-image" src="" alt="Node Image">
+    </div>
+    <div id="edge-details" style="display: none;">
+        <p><strong>Edge ID:</strong> <span id="edge-id"></span></p>
+        <p><strong>Type:</strong> <span id="edge-type"></span></p>
+        <p><strong>Description:</strong> <span id="edge-description"></span></p>
+        <p><strong>Function:</strong> <span id="edge-function"></span></p>
+        <p><strong>View Image:</strong>
+        <div style="display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; ">
+                <img id="edge-from-image" class="edge-image" src="" alt="From Node Image">
+                <span style="margin: 0 10px; font-weight: bold;">TO</span> <!-- "TO" 在两张图片的中间 -->
+                <img id="edge-to-image" class="edge-image" src="" alt="To Node Image">
+            </div>
+            <img id="widget-image" class="edge-image" src="" alt="Widget Image">
+        </div>
+
+    </div>
+</div>
+
+<!-- 引用包含数据的 JS 文件 -->
+<script type="text/javascript" src="utg.js"></script>
+
+<script type="text/javascript">
+    // 使用引用的数据 `utg` 创建网络图
+    const nodes = new vis.DataSet(utg.nodes);
+    const edges = new vis.DataSet(utg.edges);
+
+    const container = document.getElementById('network');
+    const networkData = {nodes: nodes, edges: edges};
+    const options = {
+        nodes: {shape: 'image', size: 40, mass:4},
+        edges: {arrows: 'to'},
+        interaction: {dragNodes: true},
+        physics: {enabled: true}
+    };
+
+    const network = new vis.Network(container, networkData, options);
+    network.on('click',(e)=>{
+        //点击边
+        if (e.nodes.length===0 && e.edges.length===1){
+            const edge_id = e.edges[0];
+            edge = utg.edges.find(edge => edge.id === edge_id);
+            console.log(edge)
+            showEdgeDetails(edge)
+        }
+        //点击节点
+        else if(e.nodes.length===1){
+            const node_id = e.nodes[0];
+            node = utg.nodes.find(node => node.id === node_id);
+            showNodeDetails(node);
+        }
+    })
+
+    const formatValue = (value) => {
+        // 如果值是对象，转换为格式化的 JSON 字符串
+        if (value !== null && typeof value === 'object') {
+            return JSON.stringify(value, null, 2);
+        }
+        // 否则直接返回值的字符串形式
+        return value || ''; // 如果值是 null 或 undefined，返回空字符串
+    };
+
+    const showEdgeDetails = (d) => {
+        document.getElementById("node-details").style.display = "none";
+        document.getElementById("edge-details").style.display = "block";
+        document.getElementById("edge-id").textContent = formatValue(d.id);
+        document.getElementById("edge-type").textContent = formatValue(d.action);
+        document.getElementById("edge-description").textContent = formatValue(d.summary.description);
+        document.getElementById("edge-function").textContent = formatValue(d.summary.function);
+        document.getElementById("edge-from-image").src = utg.nodes.find(node => node.id === d.from).image;
+        document.getElementById("edge-to-image").src = utg.nodes.find(node => node.id === d.to).image;
+        document.getElementById("widget-image").src = d.image;
+    }
+
+    const showNodeDetails = (d) => {
+        document.getElementById("node-details").style.display = "block";
+        document.getElementById("edge-details").style.display = "none";
+        document.getElementById("state-id").textContent = formatValue(d.id);
+        document.getElementById("state-package").textContent = formatValue(d.package);
+        document.getElementById("state-activity").textContent = formatValue(d.activity);
+        document.getElementById("state-type").textContent = formatValue(d.summary.type);
+        document.getElementById("state-description").textContent = formatValue(d.summary.description);
+        document.getElementById("state-image").src = d.image;
+    }
+
+</script>
+</body>
+</html>

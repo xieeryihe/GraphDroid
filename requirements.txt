@@ -1,0 +1,20 @@
+opencv-python
+pillow
+scikit-image
+scikit-learn
+scient
+pandas
+tqdm
+requests
+python-Levenshtein
+# protobuf==3.20.1
+paddleocr
+paddlepaddle
+anytree
+openai
+torch
+torchvision
+torchaudio
+ultralytics
+adbutils
+uiautomator2
