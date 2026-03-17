@@ -106,13 +106,24 @@ def write_excel():
     write_json_to_excel(data_file_path, excel_file_path)
 
 
+def run_semantic_comp():
+    from core.experiment.semantic_comp import summary_target_images, analyze_summaries, cal_results
+    image_num = 30
+    base_dir = "bak\\闭源\\meituan_50"
+    work_dir = "bak\\页面理解对比\\gemma_2"
+    # summary_target_images(base_dir, image_num=image_num)
+    # analyze_summaries(work_dir, task_dir, image_num=image_num)
+    cal_results(work_dir)
+
+
 def experiment():
     # run_preprocess()
-    run_cases()
+    # run_cases()
     # run_human_cases()
     # run_distribution()
     # run_executor()
     # run_app_agent()
     # run_case_map()
     # write_excel()
+    run_semantic_comp()
     pass

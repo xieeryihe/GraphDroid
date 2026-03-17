@@ -210,6 +210,15 @@ class Agent(BaseAgent):
         # 获取 rects 并绘制 SoM
         rects = get_rects(image_path=self.current_image_path)
 
+        # TODO，补丁，最后要删去
+        try:
+            for index, rect in enumerate(rects):
+                if "com.flauschcode.broccoli:id/toolbar" in rect.get(DictKey.RESOURCE_ID, '')[0]:
+                    rects.pop(index)
+                    break
+        except Exception as e:
+            pass
+
         # 为每个 rect 增加 node_id 和 SoM_tag 属性
         for index, rect in enumerate(rects):
             rect[DictKey.NODE_ID] = index

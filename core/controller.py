@@ -83,6 +83,11 @@ class AndroidController:
             self.device = device
         self.width, self.height = self.get_device_size()
 
+        # 两种command 有时候会有一个执行失败，所以都准备了
+        self.intent_command1 = f'adb -s {self.device} shell dumpsys activity | findstr "mResumedActivity"'  
+        self.intent_command2 = f'adb -s {self.device} shell dumpsys window | findstr "mCurrentFocus"'
+        self.intent_command = self.intent_command1  # 默认先用 command1，失败了再切换到 command2
+
     def get_device_size(self):
         adb_command = f"adb -s {self.device} shell wm size"
         result = execute_adb(adb_command)
@@ -168,17 +173,22 @@ class AndroidController:
 
     def get_current_intent(self):
         if current_os != 'Windows':
-            adb_command = f"adb -s {self.device} shell dumpsys window | grep -E 'mCurrentFocus|mFocusedApp'"
-        else:
-            # adb_command = f'adb -s {self.device} shell dumpsys window | findstr "mCurrentFocus"'
-            # adb_command = f"adb -s {self.device} shell \"dumpsys window | grep -E 'mCurrentFocus|mFocusedApp'\""  # miui 可能会导致通知消息在栈顶，影响结果
-            adb_command = f'adb -s {self.device} shell dumpsys activity | findstr "mResumedActivity"'  # 获取前台APP
-        result = execute_adb(adb_command)
-        if result != "ERROR":
-            match = re.search(r'[\w\.]+/[\w\.]+', result)
-            if match:
-                intent = match.group(0)
-                result = intent
+            self.intent_command = f"adb -s {self.device} shell dumpsys window | grep -E 'mCurrentFocus|mFocusedApp'"
+            
+        for i in range(3):  # command1不行就试2
+            result = execute_adb(self.intent_command)
+            if result != "ERROR":
+                match = re.search(r'[\w\.]+/[\w\.]+', result)
+                if match:
+                    intent = match.group(0)
+                    result = intent
+                    break
+            else:  # 轮转指令
+                print(f"get_current_intent failed with command: {self.intent_command}, switching command and retrying...")
+                if i%2 == 0:
+                    self.intent_command = self.intent_command2
+                else:
+                    self.intent_command = self.intent_command1
         return result
     
     def getcurfrag(self):

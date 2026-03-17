@@ -240,5 +240,17 @@ def test_get_task_data_dirs():
 if __name__ == "__main__":
     # test_cal_jsonl()
     # test_utg()
-    test_get_task_data_dirs()
+    from utils.utils import read_json_file, write_json_file
+    json_file_path = "bak\\闭源\\meituan_50\\full.json"
+    formatted_json_file_path = "bak\\闭源\\meituan_50\\new.json"
+    data = read_json_file(json_file_path)
+    formatted_data = []
+    for item in data:
+        d = {
+            DictKey.IMAGE_PATH: item[DictKey.IMAGE_PATH],
+            DictKey.SUMMARY: item[DictKey.SUMMARY]["description"]["function"]
+        }
+        formatted_data.append(d)
+    
+    write_json_file(formatted_data, formatted_json_file_path)
     pass

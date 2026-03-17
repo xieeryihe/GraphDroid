@@ -12,9 +12,9 @@ from core.agent.agent import Agent
 
 def run_utg():
     controller = AndroidController()
-    app_name = 'meituan'
+    app_name = 'dianping'
     intent = get_pre_made_intent(app_name)
-    max_step = 5
+    max_step = 50
     explorer = Explorer(controller=controller, intent=intent, 
                         max_depth=5, max_step=max_step,
                         task_dir=logger.task_dir,
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     chat.CHAT_MODE = chat.CHAT_LAB
     # run_utg()
     # run_utgs()
-    run_agent()
+    # run_agent()
     # run_all_agent()
-    # run_experiment()
+    run_experiment()
     pass
